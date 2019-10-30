@@ -36,7 +36,7 @@ require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) =>
 	
 	await build({
 		name: 'j-keycode',
-		user: 'LongTengDao@ltd',
+		user: 'LongTengDao',
 		Desc: [
 			'KeyCode 相关共享实用程序。从属于“简计划”。',
 			'KeyCode util. Belong to "Plan J".',
