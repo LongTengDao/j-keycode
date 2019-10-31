@@ -1,5 +1,6 @@
 'use strict';
 
+const CASE = '/';
 const RANGE = '-';
 const EOL = '\n';
 
@@ -16,7 +17,7 @@ require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) =>
 		const start = +range[0];
 		const end = +range[1];
 		const dif = keys.map(key => {
-			const dif = /^(\w*){(\w+)}(\w*)$/.exec(key);
+			const dif = /^(\w*){(\w+)-\w+}(\w*)$/.exec(key);
 			const init = +dif[2];
 			return Number.isNaN(init)
 				? { base: dif[2].codePointAt(0)-start, before: dif[1], after: dif[3] }
@@ -31,8 +32,8 @@ require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) =>
 		return s.flat();
 	}).flat();
 	
-	await put('src/export.d.ts', entries.map(({ key, dec }) => `/* ${Hex(dec)} */ export var ${key} :${dec};`).join(EOL));
-	await put('src/export.js', entries.map(({ key, dec }) => `export var ${key} = ${dec};`).join(EOL));
+	await put('src/export.d.ts', `export var iOS :boolean;${EOL}`+entries.map(({ key, dec }) => `/* ${Hex(dec)} */ export var ${key} :${dec.replace('/', ' | ')};`).join(EOL));
+	await put('src/export.js', `import window from '.window';${EOL}export var iOS = /*#__PURE__*/function(){ return window.navigator.userAgent.indexOf('Mac OS X')>0; }();${EOL}var Firefox = window.KeyboardEvent && window.KeyboardEvent.DOM_VK_EQUALS===61;${EOL}`+entries.map(({ key, dec }) => `export var ${key} = ${Dec(dec)};`).join(EOL));
 	
 	await build({
 		name: 'j-keycode',
@@ -51,4 +52,13 @@ require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) =>
 	
 });
 
-function Hex (dec) { return Number(dec).toString(16).toUpperCase().padStart(2, '0'); }
+function Hex (dec) {
+	return dec.includes(CASE)
+		? '?:'
+		: Number(dec).toString(16).toUpperCase().padStart(2, '0');
+}
+function Dec (dec) {
+	if ( !dec.includes(CASE) ) { return dec; }
+	const cases = dec.split('/');
+	return `Firefox ? ${cases[1]} : ${cases[0]}`;
+}
