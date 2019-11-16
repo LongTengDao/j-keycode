@@ -1,4 +1,4 @@
-export var iOS :boolean;
+export var Apple :boolean;
 /* 08 */ export var Backspace :8;
 /* 09 */ export var Tab :9;
 /* 0C */ export var Clear :12;

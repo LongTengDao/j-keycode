@@ -6,7 +6,7 @@ const EOL = '\n';
 
 require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) => {
 	
-	const src = await get('src/export.tsv');
+	const src = await get('src/export.body.tsv');
 	const entries = src.split(/\r?\n(?!\^\t)/).slice(1).map(each => {
 		let keys = each.split(/(?:\r?\n\^)?\t/);
 		const dec = keys.shift();
@@ -32,10 +32,11 @@ require('@ltd/j-dev')(__dirname+'/..')(async ({ get, put, build, 龙腾道 }) =>
 		return s.flat();
 	}).flat();
 	
-	await put('src/export.d.ts', `export var iOS :boolean;${EOL}`+entries.map(({ key, dec }) => `/* ${Hex(dec)} */ export var ${key} :${dec.replace('/', ' | ')};`).join(EOL));
-	await put('src/export.js', `import window from '.window';${EOL}export var iOS = /*#__PURE__*/function(){ return window.navigator.userAgent.indexOf('Mac OS X')>0; }();${EOL}var Firefox = window.KeyboardEvent && window.KeyboardEvent.DOM_VK_EQUALS===61;${EOL}`+entries.map(({ key, dec }) => `export var ${key} = ${Dec(dec)};`).join(EOL));
+	await put('build/export.d.ts', await get('src/export.head.d.ts')+EOL+entries.map(({ key, dec }) => `/* ${Hex(dec)} */ export var ${key} :${dec.replace('/', ' | ')};`).join(EOL));
+	await put('build/export.js', await get('src/export.head.js')+EOL+entries.map(({ key, dec }) => `export var ${key} = ${Dec(dec)};`).join(EOL));
 	
 	await build({
+		src: 'build',
 		name: 'j-keycode',
 		user: 'LongTengDao',
 		Desc: [
